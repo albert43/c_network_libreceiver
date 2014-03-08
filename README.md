@@ -13,9 +13,11 @@ Release Note:
             #    Support Windows OS platform.
                 #    Add /D "OS_WINDOWS" to command line
 
-    V-2.0.1.0
+    V-2.0.1.2
         #    Release date: 2014-02-27
         #    Enhancements and Improvements:
             #   Add thread function.
             #   Add callback function.
                 #   The callback function returns the error code or the received data.
+            #   Add Recv_recv(): To receive the single connection data.
+            #   Add Recv_getAttr() : To get the receiver attribute.

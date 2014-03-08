@@ -120,12 +120,15 @@ struct RECV_ATTR_S
 struct RECV_S
 {
     int                 iSocket;    
-    BOOL                bStateStart;    //  Only available when RecvType is RECV_T_BIND.
+    BOOL                bStart;            //  Only available when RecvType is RECV_T_BIND.
     pthread_t           tThread;
     fd_set              fdRecv;
     struct RECV_ATTR_S  stAttr;
 };
 
+//
+//  Callback
+//
 struct RECV_DATA_INFO_S
 {
     time_t                      RecvTime;
@@ -155,7 +158,12 @@ RECV_RET Recv_open(struct RECV_S *pstSess,
 RECV_RET Recv_close(struct RECV_S *pstSess);
 RECV_RET Recv_start(struct RECV_S *pstSess);
 RECV_RET Recv_stop(struct RECV_S *pstSess);
-int Recv_recv(struct RECV_S *pstSess, 
+
+//  This function is used to receive data through iSocket and the received information
+//  is saved in the pRecv structure. The pRecv->bPacketEnd flag tells the receive
+//  process is finished or not.
+//  Notes that, the iSocket won't be closed even the receive process is finished.
+RECV_RET Recv_recv(struct RECV_S *pstSess, 
               int iSocket,
               struct RECV_ATTR_S *pstAttr,
               struct RECV_DATA_INFO_S *pRecv);

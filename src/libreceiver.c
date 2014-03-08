@@ -159,8 +159,6 @@ RECV_RET Recv_open(struct RECV_S *pstSess,
                    unsigned long ulPort,
                    struct RECV_ATTR_S *pstAttr)
 {
-    struct sockaddr_in      stBindaddr;
-    
     if (pstSess == NULL)
         return RECV_RET_ERR_PARAM;
     
@@ -172,7 +170,7 @@ RECV_RET Recv_open(struct RECV_S *pstSess,
     
     pstSess->iSocket = -1;
     pstSess->tThread = -1;
-    pstSess->bStateStart = FALSE;
+    pstSess->bStart = FALSE;
     FD_ZERO(&pstSess->fdRecv);
     
     memcpy(&pstSess->stAttr, pstAttr, sizeof(struct RECV_ATTR_S));
@@ -195,11 +193,13 @@ RECV_RET Recv_open(struct RECV_S *pstSess,
 
 RECV_RET Recv_close(struct RECV_S *pstSess)
 {
+    RECV_RET    Ret;
+    
     if (pstSess == NULL)
         return RECV_RET_ERR_PARAM;
     
-    if (pstSess->iSocket != -1)
-        closesocket(pstSess->iSocket);
+    if (pstSess->bStart == TRUE)
+        return RECV_RET_ERR_PROCEDURE;
 
 #ifdef OS_WINDOWS
     WSACleanup();
@@ -280,6 +280,8 @@ RECV_RET Recv_start(struct RECV_S *pstSess)
         return RECV_RET_ERR_THREAD_CREATE;
     }
     
+    pstSess->bStart = TRUE;
+    
     return RECV_RET_SUCCESS;
 }
 
@@ -288,56 +290,58 @@ RECV_RET Recv_stop(struct RECV_S *pstSess)
     if (pstSess == NULL)
         return RECV_RET_ERR_PARAM;
     
-    if (pstSess->iSocket == -1)
+    if (pstSess->bStart == FALSE)
         return RECV_RET_SUCCESS;
         
     pthread_cancel(pstSess->tThread);
     closesocket(pstSess->iSocket);
     
+    pstSess->bStart = FALSE;
+    
     return RECV_RET_SUCCESS;
 }
 
-int Recv_recv(struct RECV_S *pstSess, 
+RECV_RET Recv_recv(struct RECV_S *pstSess, 
               int iSocket,
               struct RECV_ATTR_S *pstAttr,
               struct RECV_DATA_INFO_S *pRecv)
 {
-    return 0;
+    int                         iRet;
+    struct RECV_DATA_INFO_S     stReceive;
+    
+    if (pstSess == NULL)
+        return RECV_RET_ERR_PARAM;
+    
+    if (pstAttr == NULL)
+        return RECV_RET_ERR_PARAM;
+
+    if (iSocket == INVALID_SOCKET)
+        return RECV_RET_ERR_PARAM;
+    
+    pstSess->stAttr.RecvType = RECV_T_SINGLE;
+    memcpy(&pstSess->stAttr, pstAttr, sizeof(struct RECV_ATTR_S));
+    
+    //
+    //  Start to receive
+    //
+    iRet = recvSingleConn(pRecv, iSocket, pstAttr->uiRetry);
+    if (iRet == 0)
+        pRecv->bPacketEnd = TRUE;
+    else if (iRet > 0)
+        pRecv->bPacketEnd = FALSE;
+    
+    return RECV_RET_SUCCESS;
 }
 
-void Display(struct RECV_DATA_INFO_S *pRecv, void *pUserdata)
+RECV_RET Recv_getAttr(struct RECV_S *pstSess, struct RECV_ATTR_S *pstAttr)
 {
-    printf ("Here is Display()\n");
-    printf ("Thread Ret:%d\n", pRecv->Ret);
-    printf ("Time: %u\n", pRecv->RecvTime);
-    printf ("Client address: %s:%d, Socket:%d\n", 
-                inet_ntoa(pRecv->ClientAddr.sin_addr), 
-                pRecv->ClientAddr.sin_port);
-    printf ("Received %d bytes data(%s):\n%s\n", 
-                pRecv->uiDataNum, 
-                pRecv->bPacketEnd == TRUE ? "End" : "Not End", 
-                pRecv->szData);
-}
-
-int main (void)
-{
-    RECV_RET            Ret;
-    struct RECV_S       stRecv;
-    struct RECV_ATTR_S  stAttr;
+    if (pstSess == NULL)
+        return RECV_RET_ERR_PARAM;
     
-    stAttr.tmRecvTO.tv_sec = 5;
-    stAttr.tmRecvTO.tv_usec = 0;
-    stAttr.uiRetry = 5;
-    stAttr.Callback.pfn = Display;
-    stAttr.Callback.pUserdata = NULL;
-    stAttr.bKeepTargetSockOpen = FALSE;
+    if (pstAttr == NULL)
+        return RECV_RET_ERR_PARAM;
     
-    Ret = Recv_open(&stRecv, "192.168.0.102", 14000, &stAttr);
-    if (Ret != RECV_RET_SUCCESS)
-        printf ("Recv_open() Failure. Ret=%d\n", Ret);
-    Ret = Recv_start(&stRecv);
-    if (Ret != RECV_RET_SUCCESS)
-        printf ("Recv_start() Failure. Ret=%d\n", Ret);
-    while (1);
-    return 0;
+    memcpy(pstAttr, &pstSess->stAttr, sizeof(struct RECV_ATTR_S));
+    
+    return RECV_RET_SUCCESS;
 }
