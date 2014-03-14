@@ -47,11 +47,10 @@
 
 //  Linux
 #ifdef OS_LINUX
-typedef enum _BOOL
-{
-    FALSE = 0,
-    TRUE
-}BOOL;
+#define BOOL                    int
+#define TRUE                    1
+#define FALSE                   0
+
 #define INVALID_SOCKET          -1
 #define SOCKET_ERROR            -1
 #define closesocket(sock)       close(sock)

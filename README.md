@@ -21,3 +21,5 @@ Release Note:
                 #   The callback function returns the error code or the received data.
             #   Add Recv_recv(): To receive the single connection data.
             #   Add Recv_getAttr() : To get the receiver attribute.
+    V-2.0.1.3
+        #   Resolved BOOL type redefined complier error.

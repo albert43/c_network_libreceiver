@@ -27,7 +27,7 @@ int main (void)
     stAttr.Callback.pUserdata = NULL;
     stAttr.bKeepTargetSockOpen = FALSE;
     
-    Ret = Recv_open(&stRecv, "192.168.0.102", 14000, &stAttr);
+    Ret = Recv_open(&stRecv, "192.168.0.103", 14000, &stAttr);
     if (Ret != RECV_RET_SUCCESS)
         printf ("Recv_open() Failure. Ret=%d\n", Ret);
     Ret = Recv_start(&stRecv);

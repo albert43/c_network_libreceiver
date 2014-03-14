@@ -9,13 +9,13 @@ endif
 VERSION_MAJOR=2
 VERSION_MINOR=0
 VERSION_RELEASE=1
-VERSION_BUILD=0
+VERSION_BUILD=3
 
 #   According to the target file type, the suffix of TARGET_NAME should be
 #   Executable file : (no suffix)
 #   Static library  : .a
 #   Dynamic library : .so
-TARGET_NAME=libreceiver
+TARGET_NAME=libreceiver.a
 CATEGORY_NAME=network
 
 #   Only "c" and "cpp" are available.
