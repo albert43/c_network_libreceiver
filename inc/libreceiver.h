@@ -132,6 +132,9 @@ struct RECV_DATA_INFO_S
 {
     time_t                      RecvTime;
     struct sockaddr_in          ClientAddr;
+    
+    //  iSockClient is the accepted socket description.
+    //  This description should be closed in the callback function.
     int                         iSockClient;
     RECV_RET                    Ret;
     union
@@ -150,21 +153,26 @@ struct RECV_DATA_INFO_S
 };
 typedef void (*FN_CALLBACK)(struct RECV_DATA_INFO_S *pRecv, void *pUserdata);
 
+//  i/p:
+//      pstAttr : This parameter can not be NULL here. The caller must assigne the callback function.
 RECV_RET Recv_open(struct RECV_S *pstSess, 
-                  char *pszBindAddr,
-                  unsigned long ulPort,
-                  struct RECV_ATTR_S *pstAttr);
+                   char *pszBindAddr,
+                   unsigned long ulPort,
+                   struct RECV_ATTR_S *pstAttr);
 RECV_RET Recv_close(struct RECV_S *pstSess);
 RECV_RET Recv_start(struct RECV_S *pstSess);
 RECV_RET Recv_stop(struct RECV_S *pstSess);
 
-//  This function is used to receive data through iSocket and the received information
-//  is saved in the pRecv structure. The pRecv->bPacketEnd flag tells the receive
-//  process is finished or not.
-//  Notes that, the iSocket won't be closed even the receive process is finished.
+//  Description:
+//      This function is used to receive data through iSocket and the received information
+//      is saved in the pRecv structure. The pRecv->bPacketEnd flag tells the receive
+//      process is finished or not.
+//      Notes that, the iSocket won't be closed even the receive process is finished.
+//  i/p:
+//      pstAttr : This parameter can be NULL. If it is NULL all attribute is the default value.
 RECV_RET Recv_recv(struct RECV_S *pstSess, 
-              int iSocket,
-              struct RECV_ATTR_S *pstAttr,
-              struct RECV_DATA_INFO_S *pRecv);
+                   int iSocket,
+                   struct RECV_ATTR_S *pstAttr,
+                   struct RECV_DATA_INFO_S *pRecv);
 RECV_RET Recv_getAttr(struct RECV_S *pstSess, struct RECV_ATTR_S *pstAttr);
 #endif  //  __AL_NETWORK_RECEIVER_LIB_H__

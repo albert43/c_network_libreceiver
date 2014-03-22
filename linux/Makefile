@@ -9,7 +9,7 @@ endif
 VERSION_MAJOR=2
 VERSION_MINOR=0
 VERSION_RELEASE=1
-VERSION_BUILD=3
+VERSION_BUILD=4
 
 #   According to the target file type, the suffix of TARGET_NAME should be
 #   Executable file : (no suffix)
@@ -31,7 +31,7 @@ TARGET_LFLAGS=-lpthread -ldl
 #   Path
 #
 ifeq "$(REPOS_ROOT)" ""
-    REPOS_ROOT=/repos
+    $(error Please set the repository root path. export REPOS_ROOT=/xxx/repos)
 endif
 
 include $(REPOS_ROOT)/makefile/source.mak

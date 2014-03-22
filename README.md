@@ -23,3 +23,7 @@ Release Note:
             #   Add Recv_getAttr() : To get the receiver attribute.
     V-2.0.1.3
         #   Resolved BOOL type redefined complier error.
+    V-2.0.1.4
+        #   Resolve accepted socket description is closed that cause the caller callback function
+            can not send package back to client issue.
+        #   struct RECV_ATTR_S *pstAttr parameter can be NULL in Recv_recv() but can't in Recv_open().

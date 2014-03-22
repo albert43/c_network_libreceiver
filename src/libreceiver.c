@@ -17,7 +17,7 @@ int recvSingleConn(struct RECV_DATA_INFO_S *pstReceive, int iSockClient, unsigne
         if (pstReceive->uiDataNum == 0)
         {
             //  No data
-            DEBUG_PRINTF("%s(): Receive no data\n", __FUNCTION__);
+            DEBUG_PRINTF("%s(): %d, Receive no data.\n", __FUNCTION__, __LINE__);
             return 0;
         }
         else if (pstReceive->uiDataNum < 0)
@@ -25,13 +25,13 @@ int recvSingleConn(struct RECV_DATA_INFO_S *pstReceive, int iSockClient, unsigne
             if ((errno == EINTR) && (uiRetry < nRetry))
             {
                 //  Error occur, retry!
-                DEBUG_PRINTF("%s(): The %dth Retry\n", __FUNCTION__, uiRetry);
+                DEBUG_PRINTF("%s:%d, Retry: %d\n", __FILE__, __LINE__, uiRetry);
                 uiRetry++;
                 continue;
             }
             else
             {
-                DEBUG_PRINTF("%s(): recv() error, errno:%d\n", __FUNCTION__, errno);
+                DEBUG_PRINTF("%s(): %d, errno: %d\n", __FUNCTION__, __LINE__, errno);
                 pstReceive->Ret = RECV_RET_ERR_SOCKET_RECV;
                 pstReceive->Errno = errno;
                 return -1;
@@ -102,7 +102,7 @@ void* recvThread(void *pArgs)
         iSelect = select(iMaxFd + 1, &pstSess->fdRecv, NULL, NULL, NULL);
         if (iSelect < 0)
         {
-            DEBUG_PRINTF("%s(): select() error, errno:%d\n", __FUNCTION__, errno);
+            DEBUG_PRINTF("%s: %d, errno:%d\n", __FILE__, __LINE__, errno);
             stReceive.Ret = RECV_RET_ERR_FILE_SELECT;
             stReceive.Errno = errno;
             ((FN_CALLBACK)pstAttr->Callback.pfn)(&stReceive, pstAttr->Callback.pUserdata);
@@ -113,7 +113,7 @@ void* recvThread(void *pArgs)
         stReceive.iSockClient = accept(pstSess->iSocket, (struct sockaddr *) &stReceive.ClientAddr, (int *)&nClientAddrLen);
         if (stReceive.iSockClient == -1)
         {
-            DEBUG_PRINTF("%s(): accept() error, errno:%d\n", __FUNCTION__, errno);
+            DEBUG_PRINTF("%s: %d, errno:%d\n", __FILE__, __LINE__, errno);
             stReceive.Ret = RECV_RET_ERR_SOCKET_ACCEPT;
             stReceive.Errno = errno;
             ((FN_CALLBACK)pstAttr->Callback.pfn)(&stReceive, pstAttr->Callback.pUserdata);
@@ -130,7 +130,7 @@ void* recvThread(void *pArgs)
                       (char *)&pstAttr->tmRecvTO, (int)sizeof(struct timeval)) != 0)
 #endif
         {
-            DEBUG_PRINTF("%s(): setsockopt() error, errno:%d\n", __FUNCTION__, errno);
+            DEBUG_PRINTF("%s: %d, errno:%d\n", __FILE__, __LINE__, errno);
             closesocket(stReceive.iSockClient);
             stReceive.Ret = RECV_RET_ERR_SOCKET_OPTION;
             stReceive.Errno = errno;
@@ -147,7 +147,7 @@ void* recvThread(void *pArgs)
             else if (iRet > 0)
                 stReceive.bPacketEnd = FALSE;
             else
-                closesocket(stReceive.iSockClient);
+//              closesocket(stReceive.iSockClient);
             
             ((FN_CALLBACK)pstAttr->Callback.pfn)(&stReceive, pstAttr->Callback.pUserdata);
         }
@@ -237,6 +237,7 @@ RECV_RET Recv_start(struct RECV_S *pstSess)
     //  Bind the address and port
     if (bind(pstSess->iSocket, (struct sockaddr *)&pstSess->stAttr.stBindaddr, sizeof(struct sockaddr_in)) == -1)
     {
+        DEBUG_PRINTF("%s(): %d, errno: %d\n", __FUNCTION__, __LINE__, errno);
         perror("bind()");
         closesocket(pstSess->iSocket);
         return RECV_RET_ERR_SOCKET_BIND;
@@ -318,9 +319,12 @@ RECV_RET Recv_recv(struct RECV_S *pstSess,
     if (iSocket == INVALID_SOCKET)
         return RECV_RET_ERR_PARAM;
     
+    if (pstAttr == NULL)
+        memset(&pstSess->stAttr, 0, sizeof(struct RECV_ATTR_S));
+    else
+        memcpy(&pstSess->stAttr, pstAttr, sizeof(struct RECV_ATTR_S));
     pstSess->stAttr.RecvType = RECV_T_SINGLE;
-    memcpy(&pstSess->stAttr, pstAttr, sizeof(struct RECV_ATTR_S));
-    
+
     //
     //  Start to receive
     //
