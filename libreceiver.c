@@ -345,3 +345,9 @@ RECV_RET Recv_getAttr(struct RECV_S *pstSess, struct RECV_ATTR_S *pstAttr)
     
     return RECV_RET_SUCCESS;
 }
+
+const RECEIVER_VERSION_ST* Recv_GetVersion()
+{
+    return &gcs_ReceiverVersion;
+
+}

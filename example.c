@@ -19,7 +19,14 @@ int main (void)
     RECV_RET            Ret;
     struct RECV_S       stRecv;
     struct RECV_ATTR_S  stAttr;
+    RECEIVER_VERSION_ST *pstVersion;
     
+    pstVersion = Recv_GetVersion();
+    printf ("Receiver Version: V-%d.%d.%d.%d\n", 
+        pstVersion->uiMajor, 
+        pstVersion->uiMinor, 
+        pstVersion->uiRelease, 
+        pstVersion->uiBuild);
     stAttr.tmRecvTO.tv_sec = 5;
     stAttr.tmRecvTO.tv_usec = 0;
     stAttr.uiRetry = 5;
@@ -27,7 +34,7 @@ int main (void)
     stAttr.Callback.pUserdata = NULL;
     stAttr.bKeepTargetSockOpen = FALSE;
     
-    Ret = Recv_open(&stRecv, "192.168.0.103", 14000, &stAttr);
+    Ret = Recv_open(&stRecv, "192.168.95.20", 14000, &stAttr);
     if (Ret != RECV_RET_SUCCESS)
         printf ("Recv_open() Failure. Ret=%d\n", Ret);
     Ret = Recv_start(&stRecv);

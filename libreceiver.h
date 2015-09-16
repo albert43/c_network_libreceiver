@@ -62,6 +62,12 @@
 #define WSA_VERSION MAKEWORD(2, 2)  // using winsock 2.2
 #endif // OS_WINDOWS
 
+typedef struct _RECEIVER_VERSION_ST
+{
+    unsigned int                uiMajor, uiMinor, uiRelease, uiBuild;
+} RECEIVER_VERSION_ST;
+const static RECEIVER_VERSION_ST    gcs_ReceiverVersion = {2, 0, 1, 4};
+
 typedef enum
 {
     RECV_RET_ERR_START = -100,
@@ -105,7 +111,7 @@ struct RECV_ATTR_S
         void                *pUserdata;
     }Callback;
     
-    //  bKeepTargetSockOpen = TRUE, the received socket file description won't be close.
+    //  bKeepTargetSockOpen = TRUE, the received socket file description won't be closed.
     //  Otherwise it will be close after the receive process.
     BOOL                    bKeepTargetSockOpen;
     
@@ -167,4 +173,11 @@ RECV_RET Recv_recv(struct RECV_S *pstSess,
               struct RECV_ATTR_S *pstAttr,
               struct RECV_DATA_INFO_S *pRecv);
 RECV_RET Recv_getAttr(struct RECV_S *pstSess, struct RECV_ATTR_S *pstAttr);
+//  Description:
+//      Get this software version.
+//  i/p:
+//      none
+//  o/p:
+//      The version.
+const RECEIVER_VERSION_ST* Recv_GetVersion();
 #endif  //  __AL_NETWORK_RECEIVER_LIB_H__
